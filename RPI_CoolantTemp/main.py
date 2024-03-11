@@ -17,7 +17,8 @@ sensor_map = {"engine_out" : "03219779a7df",
 
 header = ["timestamp", "engine_out", "engine_in", "radiator_l_in","radiator_l_out", "radiator_r_in","radiator_r_out"] 
 
-file_name = "log/cooling_system_temp_" + strftime("%d_%m_%y_%H_%M_%S", localtime())+".csv"
+file_path = "log/" + strftime("%Y_%m_%d", localtime()) + "/"
+file_name = "cooling_system_temp_" + strftime("%H_%M_%S", localtime())+".csv"
 
 #logger = logging.getLogger(__name__)
 #journald_handler = JournaldLogHandler()
@@ -35,7 +36,11 @@ def temperatures_to_csv_row(temperatures):
 	for name in header:
 		if name == "timestamp":
 			continue
-		data.append("{t:.2f}".format(t=temperatures[sensor_map[name]]))
+		try:
+			data.append("{t:.2f}".format(t=temperatures[sensor_map[name]]))
+		except:
+			data.append("-1.0")
+			
 	return data
 
 def temperatures_to_can_msg(temperatures):
@@ -43,26 +48,35 @@ def temperatures_to_can_msg(temperatures):
 	for name in header:
 		if name == "timestamp":
 			continue
-		data.append(int(temperatures[sensor_map[name]]*2))
+		try:
+			data.append(int(temperatures[sensor_map[name]]*2))
+		except:
+			data.append(int(255))		
+			
 	return can.Message(arbitration_id = 0x634,
 						data = data,
 						is_extended_id = False)
 
 if __name__ == "__main__":	
 	d = DS18B20()
-	d.start()
 	
 	os.system("sudo ifconfig can0 down")
 	os.system("sudo ip link set can0 type can bitrate 1000000")
 	os.system("sudo ifconfig can0 up")
 	bus = can.Bus(channel="can0", bustype="socketcan")
+	counter = 0
 	
-	with open(file_name, "w", encoding="UTF8", newline="") as f:
+	if not os.path.exists(file_path):
+		os.mkdir(file_path)
+	
+	with open(file_path + file_name, "w", encoding="UTF8", newline="") as f:
 		writer = csv.writer(f)
 		writer.writerow(header)
+		
+		d.start()
 		sleep(3)
 		while True:
-			start = time()
+			#start = time()
 			try:
 				data = temperatures_to_csv_row(d.temperatures)
 				writer.writerow(data)
@@ -70,9 +84,13 @@ if __name__ == "__main__":
 				bus.send(msg)
 				print(data)
 				f.flush()
+				counter = 0
 			except:
-				pass
+				counter = counter + 1
+				if counter == 10:
+					exit()
 			#sleep(1 - (time()-start))
 			sleep(1.0)
 	 
+	exit()
 

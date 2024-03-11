@@ -59,10 +59,14 @@ class DS18B20(Thread):
 			
 			
 	def run(self):	
+		counter = 0
 		while True:
 			for sensor in self.sensors:
 				try:
 					self.temperatures[sensor.id] = sensor.get_corrected_temperature()
+					counter = 0				
 				except:
-					pass
+					counter = counter + 1
+					if counter == 10:
+						exit()
 			
