@@ -50,16 +50,18 @@ class DS18B20(Thread):
 	
 	def __init__(self):
 		super().__init__()
+		self.sensors = []
 		for sensor in W1ThermSensor.get_available_sensors():
 			#self.sensors.append(W1ThermSensor(sensor_type=Sensor.DS18B20, sensor_id=sensor.id))
 			self.sensors.append(W1ThermSensor(sensor_type=Sensor.DS18B20, sensor_id=sensor.id, calibration_data=calibration_data[sensor.id]))
 			self.sensors[-1].set_resolution(10)
 		print(self.sensors)
-		
-			
+					
 			
 	def run(self):	
 		counter = 0
+		#if len(self.sensors) != 6:
+		#	self.__init__()
 		while True:
 			for sensor in self.sensors:
 				try:

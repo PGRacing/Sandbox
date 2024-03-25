@@ -17,9 +17,6 @@ sensor_map = {"engine_out" : "03219779a7df",
 
 header = ["timestamp", "engine_out", "engine_in", "radiator_l_in","radiator_l_out", "radiator_r_in","radiator_r_out"] 
 
-file_path = "log/" + strftime("%Y_%m_%d", localtime()) + "/"
-file_name = "cooling_system_temp_" + strftime("%H_%M_%S", localtime())+".csv"
-
 #logger = logging.getLogger(__name__)
 #journald_handler = JournaldLogHandler()
 
@@ -64,17 +61,22 @@ if __name__ == "__main__":
 	os.system("sudo ip link set can0 type can bitrate 1000000")
 	os.system("sudo ifconfig can0 up")
 	bus = can.Bus(channel="can0", bustype="socketcan")
+	
+	d.start()
 	counter = 0
+	sleep(3)
+			
+	file_path = "log/" + strftime("%Y_%m_%d", localtime()) + "/"
+	file_name = "cooling_system_temp_" + strftime("%H_%M_%S", localtime())+".csv"
+
 	
 	if not os.path.exists(file_path):
-		os.mkdir(file_path)
+		os.mkdir(file_path)	
 	
 	with open(file_path + file_name, "w", encoding="UTF8", newline="") as f:
 		writer = csv.writer(f)
-		writer.writerow(header)
-		
-		d.start()
-		sleep(3)
+		writer.writerow(header)	
+
 		while True:
 			#start = time()
 			try:
