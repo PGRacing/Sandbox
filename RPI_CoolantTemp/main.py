@@ -12,8 +12,8 @@ sensor_map = {"engine_out" : "03219779a7df",
 "engine_in" : "03029779503b" ,
  "radiator_l_in" : "03049779e810",
 "radiator_l_out":"030197794548", 
-"radiator_r_in":"030297790ae7",
-"radiator_r_out":"0302977909b4" }
+"radiator_r_out":"030297790ae7",
+"radiator_r_in":"0302977909b4" }
 
 header = ["timestamp", "engine_out", "engine_in", "radiator_l_in","radiator_l_out", "radiator_r_in","radiator_r_out"] 
 
